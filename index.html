@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Example Game Time</title>
+    <script src="/node_modules/socket.io-client/dist/socket.io.js"></script>
+    <script>  
+      let socket = io()
+      socket.on('dateTime', (time) => {
+        // console.log(time)
+        document.querySelector('#time').innerHTML = time.dateStrung
+        document.querySelector('#icon').innerHTML = time.delimDay.icon
+        document.querySelector('#textDay').innerHTML = time.delimDay.string
+      })
+      socket.on('DateAfterStart', (time) => {
+        const table = document.createElement('table'),
+          thead = document.createElement('thead'),
+          tbody = document.createElement('tbody');
+
+          table.setAttribute('border', '1')
+          table.setAttribute('cellspacing', '5')
+          table.setAttribute('cellpadding', '10')
+          table.setAttribute('frame', 'void')
+          thead.innerHTML = Object.keys(time).map(i => `<th class="title">${i}</th>`).join('')
+          tbody.innerHTML = Object.values(time).map(i => `<td class="body">${i}</td>`).join('')
+        
+        table.append(thead, tbody)
+        document.querySelector('#timeAfter').innerHTML = ''
+        document.querySelector('#timeAfter').append(table)
+      })
+      socket.on('getTask', (task) => (document.querySelector('#resultTask').innerHTML = task.action,setTimeout(() => {document.querySelector('#resultTask').innerHTML = ''}, 3000)))
+      
+      function getDateAfterStart() {
+        socket.emit('getDateAfterStart')
+      }
+      function speedTime(speed) {
+        socket.emit('speedTime', speed)
+      }
+      function setDate(timestamp) {
+        socket.emit('setDate', timestamp)
+      }
+      function setFormat(format) {
+        socket.emit('setFormat', format)
+      }
+      function setTask(task) {
+        socket.emit('setTask', task)
+      }
+      function setReverseTime(revers) {
+        socket.emit('setReverseTime', revers)
+      }
+    </script>
+    <style>
+      *{padding: 0; margin:  0}
+      .boxIcon{display: flex;width: 260px;justify-content: space-between;}
+      #icon{width: 20px;height: 20px;}
+      #time{text-align: center; background: #faf0e6; padding: 7px 0; font-weight: bold; border-radius: 5px;}
+      #buttonSetDate{width: 100%;}
+      .setTask{width: 200px;display: flex;flex-wrap: wrap;}
+      #help{position: absolute;background: #fff;width: 550px;top: 40px;right: -158px;padding: 5px 10px;border: 1px solid;border-radius: 5px; z-index: 1;}
+      .setDate{width: 220px; display: flex; justify-content: space-between; flex-wrap: wrap;}
+      .date{width: 40px; display: flex; flex-direction: column; align-items: center;}
+      .speadBox{width: 210px; display: flex; justify-content: space-around; flex-wrap: wrap; align-content: center;}
+      .controllTime{width: 261px; margin: 0 auto; display: flex; flex-direction: column; justify-content: space-evenly;}
+      .controll{width: 100%;display: flex;flex-direction: row;justify-content: space-evenly; align-items: center;}
+      .testTime{margin: 10px 0 0 0;width: 100%; display: flex; justify-content: space-evenly;}
+      .calendar, #calendar{display: flex; align-items: flex-start; justify-content: center; flex-flow: wrap; flex-wrap: wrap;}
+      .formatData{position: relative;display: flex;width: 200px;flex-wrap: wrap;justify-content: center;}
+      .circle{width: 16px;height: 16px;border-radius: 50%;display: flex;justify-content: center;align-items: center;font-weight: bold;background: #ffffe0;cursor: help;margin: 0 0 0 6px;}
+      .titleTable{writing-mode: vertical-lr; text-orientation: upright; font-size: 1px; transform: scale3d(15, 8, 1) translate(-0.6px, -0.3px); padding: 0; width: fit-content; height: fit-content; overflow: hidden; display: unset; margin: 20px 0 0 20px;}
+      .numbeWeek{background: #add8e6;font-size: 8px;width: 14px;}
+      .weekend{background:#f08080;font-weight: bold;}
+      .table {margin: 5px 5px 0; }
+      .title{border: 0; width: 40px; font-size: 13px; padding: 4px 7px; min-width: 30px; max-width: 60px; text-align: center;}
+      .body{font-size: 13px;}
+      input{padding: 0 0 0 6px;}
+      button, input[type="submit"]{padding: 0 4px 2px 4px;min-width: 30px; cursor: pointer;}
+      h4{margin: 3px auto 5px;text-align: center;}
+      input:invalid {border: red solid 3px;}
+      input[type="number"]{width: 30px;}
+      input[name="yer"]{width: 50px}
+      mark{padding: 3px 4px;}
+      
+      thead {border: 1px solid #000;display: table-caption;border-spacing: 0px;}
+      table th{border: 0;width: 40px;max-width: 40px;font-size: 13px;}
+      td{width: 40px;text-align: center;padding: 2px 0px;border-radius: 3px;cursor: default;}
+      th{width: 100%;border: 0.5px solid; padding: 14px 8px;}
+      hr{width: 100%; margin: 20px auto;}
+      details{width: max-content; margin: 0 auto 30px;}
+      summary{position: relative; display: flex; align-content: center; justify-content: space-around; width: 180px; margin: 10px auto 0; cursor:  pointer;}
+      summary::before {content: '\25B6';}
+    </style>
+  </head>
+  <body>
+    <details>
+      <summary>
+        <h2>Т.З</h2>
+        <h3>Игровое время.</h3>  
+      </summary>
+      <ul>
+        <li>
+          Вывод игрового времени живом виде.
+        </li>
+        <li>
+          Задать стартовую дату.        
+        </li>
+        <li>
+          Вывод время прошедшее с момента стартовой даты(т.е сколько времени прошло с момента отсчета. сейчас 2020г отсчет ведется с 1970 = 52г).
+        </li>
+        <li>
+          формат вывода даты(D-M-Y H:m:s) или (Y,M,D H:m:s) разделитель могут быть (: , \s .).
+        </li>
+        <li>
+          Вывод названия дня недели (понедельник,вторник, ..., пятница).
+        </li>
+        <li>
+          Вывод номер недели.
+        </li>
+        <li>
+          Вывод названия месяца.
+        </li>
+        <li>
+          Вывод чисел в две цифры.
+        </li>
+        <li>
+          Изменение скорости отсчета времени на лету.
+        </li>
+        <li>
+          Остановка отсчета времени.
+        </li>
+        <li>
+          Отсчет времени в обратную сторону.
+        </li>
+        <li>
+          Добавлять задачи по времени.
+        </li>
+        <li>
+          Не использовать библиотеки, только натипный javaScript.
+        </li>
+        <li>
+          Деление Суток по часам (ночь: с 0 до 6, утро: c 6 до 12, день: с 12 до 18, вечер: с 18 до 0) вывод картинки на каждое време.
+        </li>
+      </ul>
+    </details>
+    <div class="controllTime">
+      <div class="coll">
+        Base time:
+        <div id="baseTime"></div>  
+      </div>
+      <div class="coll">
+        Game time is:
+        <div id="time"></div>
+        <div class="boxIcon">
+          <div id="icon"></div>
+          <div id="textDay"></div>
+        </div>
+      </div>
+      <div class="coll">
+        Game time after start: <button id="afterStart" type="button" title="Запросить прошедшее время">show</button>
+        <div id="timeAfter"></div>
+      </div>
+    </div>
+      
+    <div class="calendar">
+      <div class="controll">
+        <div class="setDate">
+          <label class="date" style="width: 60px;">
+            Y:
+            <input type="number" name="yer" min="0" max="9999" pattern="[0-9]" id="yer" value="0">
+          </label>
+          <label class="date">
+            M:
+            <input type="number" name="mon" min="0" max="12" pattern="[0-9]" id="mon" value="0">
+          </label>
+          <label class="date">
+            D:
+            <input type="number" name="days" min="0" max="30" pattern="[0-9]" id="days" value="0">
+          </label>
+          <label class="date">
+            H:
+            <input type="number" name="hou" min="0" max="24" pattern="[0-9]" id="hou" value="0">
+          </label>
+          <label class="date">
+            m:
+            <input type="number" name="min" min="0" max="60" pattern="[0-9]" id="min" value="0">
+          </label>
+          <button id="buttonSetDate" type="button">set game date</button> 
+        </div>
+        <div class="speadBox">
+          Скорость игрового времени
+          <button class="speed" type="button" data-speed="4" title="Замедлить в 2 раза">-x2</button>
+          <button class="speed" type="button" data-speed="2" title="Замедлить в 1 раза">-x1</button>
+          <button class="speed" type="button" data-speed="0" title="Пауза">||</button>
+          <button class="speed" type="button" data-speed="1" title="Стандартная скорость">0</button>
+          <button class="speed" type="button" data-speed="-2" title="Увеличить в 1 раза">+x1</button>
+          <button class="speed" type="button" data-speed="-4"title="Увеличить в 2 раза">+x2</button>
+          <div class="directionMovement">
+            <button class="direction" type="button" data-direction="prev"title="Обратный отсчет"><</button>
+             Направление 
+            <button class="direction" type="button" data-direction="next"title="Нормальный отсчет">></button>  
+          </div>
+        </div>
+        <div class="formatData">
+          Формат вывода времени<span class="circle">?</span>
+          <input type="text" name="format" id="format" placeholder="DD-MM-YYYY h:i:s">
+          <div style="display: none;" id="help">
+          <h4>Формат даты распознает следующие символы</h4>
+            <ul>
+              <li>Возможные разделители: <strong>Примеры: пробел(<mark> </mark>) запятая(<mark>,</mark>) точка(<mark>.</mark>) двоеточие(<mark>:</mark>) тире(<mark>-</mark>)</strong></li>
+              <li><mark>Y:</mark> Порядковый номер года, 4 цифры <strong>Примеры: 1, 2</strong></li>
+              <li><mark>YY:</mark> Порядковый номер года, 4 цифры <strong>Примеры: 10, 20</strong></li>
+              <li><mark>YYY:</mark> Порядковый номер года, 4 цифры <strong>Примеры: 100, 200</strong></li>
+              <li><mark>YYYY:</mark> Порядковый номер года, 4 цифры <strong>Примеры: 1000, 2000</strong></li>
+              <li><mark>M:</mark> Сокращённое наименование месяца, 3 символа <strong>Примеры: Янв, Авг</strong></li>
+              <li><mark>MM:</mark> Порядковый номер месяца с ведущим нулём <strong>Примеры: от 01 до 12</strong></li>
+              <li><mark>D:</mark> День месяца, 1 цифры <strong>Примеры: от 1 до 30</strong></li>
+              <li><mark>DD:</mark> День месяца, 2 цифры с ведущим нулём <strong>Примеры: от 01 до 30</strong></li>
+              <li><mark>W:</mark> Порядковый номер дня недели <strong>Примеры: от 0 (Понедельник) до 6 (Воскресенье)</strong></li>
+              <li><mark>w:</mark> Текстовое представление дня недели, 3 символа <strong>Примеры: Пон, Сре</strong></li>
+              <li><mark>h:</mark> Часы в 24-часовом формате с ведущим нулём <strong>Примеры: от 00 до 23</strong></li>
+              <li><mark>i:</mark> Минуты с ведущим нулём <strong>Примеры: от 00 до 59</strong></li>
+              <li><mark>s:</mark> Секунды с ведущим нулём <strong>Примеры:  от 00 до 59</strong></li>
+            </ul>
+            <strong>Пример:</strong> <mark>w DD-M-YY h:i:s</mark> <em>Пон 05-Фев-01 01:20:05</em>
+          </div>
+        </div>
+        <div class="setTask">
+          Задать время события
+          <form id="formTask">
+            <input type="text" name="title" placeholder="tast name">
+            <input type="text" name="action" placeholder="text show messange">
+            Постоянное событие: <input type="checkbox" name="event">
+            <input type="text" name="end" placeholder="example: YY-MM-DD h:i:s">
+            <input type="submit" name="submit" value="set task">
+          </form>
+          <div id="resultTask"></div>
+        </div>
+      </div>
+      <div class="testTime">
+        <label>
+          месяцы:
+          <input type="number" name="month" min="0" pattern="[0-9]" id="month" value="0">
+        </label>-
+        <label>
+          дни:
+          <input type="number" name="day" min="0" pattern="[0-9]" id="day" value="0">
+        </label>-
+        <label>
+          часы:
+          <input type="number" name="hour" min="0" pattern="[0-9]" id="hour" value="0">
+        </label>-
+        <label>
+          минуты:
+          <input type="number" name="minute" min="0" pattern="[0-9]" id="minute" value="0">
+        </label> =
+          <label>
+          timestamp:
+          <input type="text" name="timestamp" id="timestamp" disabled>
+        </label> 
+      </div>
+      <div id="calendar"></div>
+    </div>
+
+
+
+    <script type="text/javascript">
+      const controll = {
+          month: JSON.parse(localStorage.getItem('controllTime'))?.month || 0,
+          day: JSON.parse(localStorage.getItem('controllTime'))?.day || 0,
+          hour: JSON.parse(localStorage.getItem('controllTime'))?.hour || 0,
+          minute: JSON.parse(localStorage.getItem('controllTime'))?.minute || 0
+        },
+        setLineShow = function() {
+          document.querySelectorAll('td').forEach(item => (
+            item.addEventListener('mouseenter', e => {
+              let theadTable = e.target.closest('table').querySelector('thead tr').childNodes,
+                arr = e.target.closest('tr').childNodes;
+              
+              arr.forEach((it, k)=>{
+                if(it==e.target && (it.classList.contains('weekend') || it.classList.length===0)){
+                  e.target.setAttribute('style', 'background: #fafad2; font-size: 15px; padding: 0; font-weight: bold;')
+                  it.closest('tr').childNodes[0].setAttribute('style', 'background: #fafad2;')
+                  theadTable[k].setAttribute('style', 'background: #fafad2; font-size: 14px;')
+                }
+              })
+              
+            }),
+            item.addEventListener('mouseleave', e => {
+              e.target.removeAttribute('style')
+              e.target.closest('table').querySelectorAll('tbody tr').forEach(item => item.querySelector('td').removeAttribute('style'))
+              e.target.closest('table').querySelector('thead tr').childNodes.forEach(item => item.removeAttribute('style'))
+            }))
+          )  
+        },
+        addTable = function(number){
+          const conteiner = document.querySelector('#calendar'),
+            headerCalendar = ['№ нед','Пон','Вто','Сре','Чет','Пят','Суб','Вос'],
+            headerMonth = ['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'],
+            createTable = (key) => {
+              const table = document.createElement('table'),
+                caption = document.createElement('caption'),
+                thead = document.createElement('thead'),
+                tbody = document.createElement('tbody');
+                
+                thead.innerHTML = headerCalendar.map((i,k) => (k===0?`<th class="titleTable">${i}</th>`:`<th>${i}</th>`)).join('')
+                caption.innerHTML = `${key+1} ${headerMonth[key]}`
+                table.append(caption)
+                table.setAttribute('class', 'table')
+                table.setAttribute('border', '1')
+                table.setAttribute('cellspacing', '5')
+                table.setAttribute('cellpadding', '10')
+                table.setAttribute('frame', 'void')
+              return {table, thead, tbody}
+            };
+          let numberShowMount = parseInt(number), lastWeek = 0, weekAll=0;
+          conteiner.innerHTML = ''
+          for (let key = 0; key < numberShowMount; key++) {
+            if(parseInt(key % 12) == 0 && key > 0) conteiner.append(document.createElement('hr'))            
+            let te = createTable(parseInt(key % 12)),tr = '',week = 0,day=1,appleDay = true;
+            
+            te.tbody.innerHTML = [...Array(37).keys()].slice(1, 37).map(i => {
+              let startTr = (week==0?'<tr>':'')
+              week +=1;
+              let endTr = (week==7?(week=0,'</tr>'):'');
+              if(startTr !== '' && day !== ''){
+                weekAll+=1
+                if(weekAll === 63) weekAll=1
+              }
+
+              if(lastWeek > 0 && i < 30 && day !== ''){
+                lastWeek -= 1;
+                tr =  `${startTr}${(week==1?'<td class="numbeWeek">'+weekAll+'</td>':'')}<td style="visibility: hidden;"></td>${endTr}`;
+              } else if(appleDay && day !== '') {
+                tr = `${startTr}${(week==1?'<td class="numbeWeek">'+weekAll+'</td>':'')}<td ${(week>5 || week<1?'class="weekend"':'')}>${day}</td>${endTr}`;
+                (day<30 ? (day += 1) : (day = '',appleDay = false, lastWeek = week));
+              } else {
+                tr =  ``;
+              }
+              return tr;
+            }).join('')
+            te.table.append(te.thead, te.tbody)
+            conteiner.append(te.table)
+            setLineShow()
+          }    
+        };
+      
+      document.addEventListener("DOMContentLoaded", function(event) {
+
+        let timer = setTimeout( function tick(){
+          document.querySelector('#baseTime').innerHTML = new Date().toLocaleString()
+          timer = setTimeout(tick, 1000);
+        }, 950)
+        
+
+        document.querySelector('#month').value = controll.month/2592000 || 1;
+        document.querySelector('#day').value = controll.day/86400 || 0;
+        document.querySelector('#hour').value = controll.hour/3600 || 0;
+        document.querySelector('#minute').value = controll.minute/60 || 0;
+        document.querySelector('#timestamp').value = (controll.month+controll.day+controll.hour+controll.minute) || 0
+        addTable(document.querySelector('#month').value)   
+        
+        document.querySelectorAll('.direction').forEach(item => item.addEventListener('click', e=>{
+          if( e.target.dataset.direction === 'prev' ){
+            setReverseTime(true)
+          } else {
+            setReverseTime(false)
+          }
+        }))
+        
+        document.querySelector('#formTask').addEventListener('submit', function(e) {
+          e.preventDefault();
+          
+          const formData = {}
+          this.childNodes.forEach(item =>{
+            if(item.nodeName === "INPUT" && item.name !== 'submit')  {
+              formData[item.name] = (item.name=='event'?item.checked:item.value)
+            }
+          })
+          // console.log('Отправляем событие', formData)
+          setTask(formData)
+        }, false);
+        document.querySelector('#afterStart').addEventListener('click', () => getDateAfterStart())
+        document.querySelector('.circle').addEventListener('mouseover', () => document.querySelector('#help').setAttribute('style', 'display: block;'))
+        document.querySelector('.circle').addEventListener('mouseout', () => document.querySelector('#help').setAttribute('style', 'display: none;'))        
+        document.querySelector('#format').addEventListener("change", (e) => setFormat(e.target.value) );
+        document.querySelector('#buttonSetDate').addEventListener("click", function() {
+          let allElem = document.querySelector('.setDate').childNodes,
+            timestamp = 0
+
+          allElem.forEach(item => {
+            if(item.constructor.name ==='HTMLLabelElement'){
+              let input = item.querySelector('input');
+              switch(input.name){
+                case 'yer':
+                  timestamp += parseInt(input.value) * 31536000
+                  break;
+                case 'mon':
+                  timestamp += parseInt(input.value) * 2592000
+                  break;
+                case 'days':
+                  timestamp += parseInt(input.value) * 86400
+                  break;
+                case 'hou':
+                  timestamp += parseInt(input.value) * 3600
+                  break;
+                case 'min':
+                  timestamp += parseInt(input.value) * 60
+                  break;
+              }
+            }
+          })
+          // console.log('Устанавливаем', timestamp)
+          setDate(timestamp)
+        })
+        document.querySelectorAll('.speed').forEach(item =>item.addEventListener("click", e => speedTime( parseInt(e.target.dataset.speed) )));
+        document.querySelector('#minute').addEventListener("input", function(e) {
+          controll.minute = (60 * parseInt(e.target.value))
+          let timestamp = controll.minute+controll.hour+controll.day+controll.month
+          document.querySelector('#timestamp').value = timestamp
+          localStorage.setItem('controllTime', JSON.stringify(controll));
+        });
+        document.querySelector('#hour').addEventListener("input", function(e) {
+          controll.hour = (3600 * parseInt(e.target.value))
+          let timestamp = controll.minute+controll.hour+controll.day+controll.month
+          document.querySelector('#timestamp').value = timestamp
+          localStorage.setItem('controllTime', JSON.stringify(controll));
+        });
+        document.querySelector('#day').addEventListener("input", function(e) {
+          controll.day = (86400 * parseInt(e.target.value))
+          let timestamp = controll.minute+controll.hour+controll.day+controll.month
+          document.querySelector('#timestamp').value = timestamp
+          localStorage.setItem('controllTime', JSON.stringify(controll));
+        });
+        document.querySelector('#month').addEventListener("input", function(e) {
+          controll.month = (2592000 * parseInt(e.target.value))
+          let timestamp = controll.minute+controll.hour+controll.day+controll.month
+          document.querySelector('#timestamp').value = timestamp
+
+          addTable(e.target.value)
+          localStorage.setItem('controllTime', JSON.stringify(controll));          
+        });        
+      });
+    </script>
+  </body>
+</html>
