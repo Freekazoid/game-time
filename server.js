@@ -2,13 +2,11 @@ const express = require('express'),
   app = express(),
   http = require('http').createServer(app),
   io = require('socket.io')(http),
-  
   gameTime = require('./game-time.js'),
   gameTimes = gameTime.init(),//инициализируем отсчет времени
   host = 'localhost',
   port = 7000;
-  
-  
+
 
 let clients = [],
   timer = false,
@@ -26,8 +24,6 @@ io.on('connection', (socket) => {
   console.log(`Client with id ${socket.id} connected`)
   clients.push(socket.id)
 
-  
-
   socket.on('speedTime', (speed) => {
     gameTimes.setSpeedOfTime(parseInt(speed));
     if(parseInt(speed) === 0) return false;
@@ -42,9 +38,6 @@ io.on('connection', (socket) => {
   socket.on('setReverseTime', (reverse) => gameTimes.setReverseTime(reverse))
   socket.on('getDateAfterStart', () =>  socket.emit('DateAfterStart', gameTimes.getDateAfterStart()))
   socket.on('setTask', (task) => typeof task === 'object' ? gameTimes.setTask(task) : socket.emit('getTask', {error: 'task not object'}))
-  
-
-
 
   socket.on('disconnect', () => {
     clients.splice(clients.indexOf(socket.id), 1)

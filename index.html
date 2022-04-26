@@ -9,8 +9,10 @@
       socket.on('dateTime', (time) => {
         // console.log(time)
         document.querySelector('#time').innerHTML = time.dateStrung
-        document.querySelector('#icon').innerHTML = time.delimDay.icon
-        document.querySelector('#textDay').innerHTML = time.delimDay.string
+        if( document.querySelector('#icon').innerHTML.toLowerCase().slice(186, 375) !== time.delimDay.icon.toLowerCase().slice(186, 375) )
+          document.querySelector('#icon').innerHTML = time.delimDay.icon
+        if(document.querySelector('#textDay').innerHTML != time.delimDay.string)
+          document.querySelector('#textDay').innerHTML = time.delimDay.string
       })
       socket.on('DateAfterStart', (time) => {
         const table = document.createElement('table'),
@@ -50,8 +52,8 @@
       }
     </script>
     <style>
-      *{padding: 0; margin:  0}
-      .boxIcon{display: flex;width: 260px;justify-content: space-between;}
+      *{padding: 0; margin: 0; font-family: Arial;}
+      .boxIcon{display: flex;min-width: 260px;justify-content: space-between;}
       #icon{width: 20px;height: 20px;}
       #time{text-align: center; background: #faf0e6; padding: 7px 0; font-weight: bold; border-radius: 5px;}
       #buttonSetDate{width: 100%;}
@@ -60,18 +62,20 @@
       .setDate{width: 220px; display: flex; justify-content: space-between; flex-wrap: wrap;}
       .date{width: 40px; display: flex; flex-direction: column; align-items: center;}
       .speadBox{width: 210px; display: flex; justify-content: space-around; flex-wrap: wrap; align-content: center;}
-      .controllTime{width: 261px; margin: 0 auto; display: flex; flex-direction: column; justify-content: space-evenly;}
+      .controllTime{width: fit-content; margin: 0 auto; display: flex; flex-direction: column; justify-content: space-evenly;}
       .controll{width: 100%;display: flex;flex-direction: row;justify-content: space-evenly; align-items: center;}
       .testTime{margin: 10px 0 0 0;width: 100%; display: flex; justify-content: space-evenly;}
-      .calendar, #calendar{display: flex; align-items: flex-start; justify-content: center; flex-flow: wrap; flex-wrap: wrap;}
+      .calendar, #calendar{display: flex; align-items: flex-start; justify-content: center; flex-flow: row wrap; width: 100%;}
+      #calendar{padding: 0 50px 50px 0;}
+      .calendar-year{width: 100%; display: flex; flex-wrap: wrap; justify-content: space-around; align-items: flex-start;}
       .formatData{position: relative;display: flex;width: 200px;flex-wrap: wrap;justify-content: center;}
       .circle{width: 16px;height: 16px;border-radius: 50%;display: flex;justify-content: center;align-items: center;font-weight: bold;background: #ffffe0;cursor: help;margin: 0 0 0 6px;}
       .titleTable{writing-mode: vertical-lr; text-orientation: upright; font-size: 1px; transform: scale3d(15, 8, 1) translate(-0.6px, -0.3px); padding: 0; width: fit-content; height: fit-content; overflow: hidden; display: unset; margin: 20px 0 0 20px;}
       .numbeWeek{background: #add8e6;font-size: 8px;width: 14px;}
       .weekend{background:#f08080;font-weight: bold;}
-      .table {margin: 5px 5px 0; }
+      .table {margin-top: 20px;}
       .title{border: 0; width: 40px; font-size: 13px; padding: 4px 7px; min-width: 30px; max-width: 60px; text-align: center;}
-      .body{font-size: 13px;}
+      .body{font-size: 10px;}
       input{padding: 0 0 0 6px;}
       button, input[type="submit"]{padding: 0 4px 2px 4px;min-width: 30px; cursor: pointer;}
       h4{margin: 3px auto 5px;text-align: center;}
@@ -79,15 +83,20 @@
       input[type="number"]{width: 30px;}
       input[name="yer"]{width: 50px}
       mark{padding: 3px 4px;}
-      
-      thead {border: 1px solid #000;display: table-caption;border-spacing: 0px;}
-      table th{border: 0;width: 40px;max-width: 40px;font-size: 13px;}
-      td{width: 40px;text-align: center;padding: 2px 0px;border-radius: 3px;cursor: default;}
-      th{width: 100%;border: 0.5px solid; padding: 14px 8px;}
-      hr{width: 100%; margin: 20px auto;}
+      caption{font-weight: 900;}
+      thead {border: 1px solid #000;border-radius: 3px; display: table-caption;border-spacing: 0px;}
+      table th{border: 0;width: 40px;max-width: 40px;font-size: 14px;}
+      td{width: 40px; height: 18px; text-align: center;padding: 2px 0px;border-radius: 3px; cursor: default;}
+      th{width: 100%;border: 0.5px solid; padding: 14px 8px; cursor: default;}
+      hr{width: 30%;}
       details{width: max-content; margin: 0 auto 30px;}
-      summary{position: relative; display: flex; align-content: center; justify-content: space-around; width: 180px; margin: 10px auto 0; cursor:  pointer;}
+      summary{position: relative; display: flex; align-content: center; justify-content: space-around; width: fit-content; margin: 10px auto 0; cursor:  pointer;}
       summary::before {content: '\25B6';}
+      #timeAfter{display: flex;}
+      h4, p{display: inline; text-align: center;}
+      .year{ width: 100%; display: flex; align-items: center; justify-content: space-around; margin: 20px auto;}
+      .timestamp-helper{ position: absolute; background: #58e958d6; min-width: 100px; min-height: 50px; border: 2px solid; border-radius: 4px; top: 0; left: 0; display: none; align-items: center; justify-content: center; flex-direction: column; font-weight: 900; color: white; text-shadow: 1px 1px black;}
+      .timestamp-helper h4{color: black; text-shadow: 1px 1px #c9c9c9; margin: 0;}
     </style>
   </head>
   <body>
@@ -141,6 +150,7 @@
         </li>
       </ul>
     </details>
+
     <div class="controllTime">
       <div class="coll">
         Base time:
@@ -165,23 +175,23 @@
         <div class="setDate">
           <label class="date" style="width: 60px;">
             Y:
-            <input type="number" name="yer" min="0" max="9999" pattern="[0-9]" id="yer" value="0">
+            <input type="number" name="yer" min="0" max="9999" id="yer" value="0">
           </label>
           <label class="date">
             M:
-            <input type="number" name="mon" min="0" max="12" pattern="[0-9]" id="mon" value="0">
+            <input type="number" name="mon" min="0" max="12" id="mon" value="0">
           </label>
           <label class="date">
             D:
-            <input type="number" name="days" min="0" max="30" pattern="[0-9]" id="days" value="0">
+            <input type="number" name="days" min="0" max="30" id="days" value="0">
           </label>
           <label class="date">
             H:
-            <input type="number" name="hou" min="0" max="24" pattern="[0-9]" id="hou" value="0">
+            <input type="number" name="hou" min="0" max="24" id="hou" value="0">
           </label>
           <label class="date">
             m:
-            <input type="number" name="min" min="0" max="60" pattern="[0-9]" id="min" value="0">
+            <input type="number" name="min" min="0" max="60" id="min" value="0">
           </label>
           <button id="buttonSetDate" type="button">set game date</button> 
         </div>
@@ -192,11 +202,11 @@
           <button class="speed" type="button" data-speed="0" title="Пауза">||</button>
           <button class="speed" type="button" data-speed="1" title="Стандартная скорость">0</button>
           <button class="speed" type="button" data-speed="-2" title="Увеличить в 1 раза">+x1</button>
-          <button class="speed" type="button" data-speed="-4"title="Увеличить в 2 раза">+x2</button>
+          <button class="speed" type="button" data-speed="-4" title="Увеличить в 2 раза">+x2</button>
           <div class="directionMovement">
-            <button class="direction" type="button" data-direction="prev"title="Обратный отсчет"><</button>
-             Направление 
-            <button class="direction" type="button" data-direction="next"title="Нормальный отсчет">></button>  
+            <button class="direction" type="button" data-direction="prev" title="Обратный отсчет">&lt;</button>
+              Направление 
+            <button class="direction" type="button" data-direction="next" title="Нормальный отсчет">&gt;</button>
           </div>
         </div>
         <div class="formatData">
@@ -206,9 +216,9 @@
           <h4>Формат даты распознает следующие символы</h4>
             <ul>
               <li>Возможные разделители: <strong>Примеры: пробел(<mark> </mark>) запятая(<mark>,</mark>) точка(<mark>.</mark>) двоеточие(<mark>:</mark>) тире(<mark>-</mark>)</strong></li>
-              <li><mark>Y:</mark> Порядковый номер года, 4 цифры <strong>Примеры: 1, 2</strong></li>
-              <li><mark>YY:</mark> Порядковый номер года, 4 цифры <strong>Примеры: 10, 20</strong></li>
-              <li><mark>YYY:</mark> Порядковый номер года, 4 цифры <strong>Примеры: 100, 200</strong></li>
+              <li><mark>Y:</mark> Порядковый номер года, 1 цифры <strong>Примеры: 1, 2</strong></li>
+              <li><mark>YY:</mark> Порядковый номер года, 2 цифры <strong>Примеры: 10, 20</strong></li>
+              <li><mark>YYY:</mark> Порядковый номер года, 3 цифры <strong>Примеры: 100, 200</strong></li>
               <li><mark>YYYY:</mark> Порядковый номер года, 4 цифры <strong>Примеры: 1000, 2000</strong></li>
               <li><mark>M:</mark> Сокращённое наименование месяца, 3 символа <strong>Примеры: Янв, Авг</strong></li>
               <li><mark>MM:</mark> Порядковый номер месяца с ведущим нулём <strong>Примеры: от 01 до 12</strong></li>
@@ -238,19 +248,19 @@
       <div class="testTime">
         <label>
           месяцы:
-          <input type="number" name="month" min="0" pattern="[0-9]" id="month" value="0">
+          <input type="number" name="month" min="0" id="month" value="0">
         </label>-
         <label>
           дни:
-          <input type="number" name="day" min="0" pattern="[0-9]" id="day" value="0">
+          <input type="number" name="day" min="0" id="day" value="0">
         </label>-
         <label>
           часы:
-          <input type="number" name="hour" min="0" pattern="[0-9]" id="hour" value="0">
+          <input type="number" name="hour" min="0" id="hour" value="0">
         </label>-
         <label>
           минуты:
-          <input type="number" name="minute" min="0" pattern="[0-9]" id="minute" value="0">
+          <input type="number" name="minute" min="0" id="minute" value="0">
         </label> =
           <label>
           timestamp:
@@ -260,31 +270,60 @@
       <div id="calendar"></div>
     </div>
 
-
+    <div class="timestamp-helper"></div>
 
     <script type="text/javascript">
       const controll = {
           month: JSON.parse(localStorage.getItem('controllTime'))?.month || 0,
           day: JSON.parse(localStorage.getItem('controllTime'))?.day || 0,
           hour: JSON.parse(localStorage.getItem('controllTime'))?.hour || 0,
-          minute: JSON.parse(localStorage.getItem('controllTime'))?.minute || 0
+          minute: JSON.parse(localStorage.getItem('controllTime'))?.minute || 0,
+          seconds: JSON.parse(localStorage.getItem('controllTime'))?.seconds || 0
         },
+        setDay = { day: false, value: 0 },
+        timestampHelper = document.querySelector('.timestamp-helper'),
         setLineShow = function() {
           document.querySelectorAll('td').forEach(item => (
+            item.addEventListener('click', e => {
+              document.querySelector('#timeAfter').innerHTML = timestampHelper.innerHTML
+            }),
             item.addEventListener('mouseenter', e => {
-              let theadTable = e.target.closest('table').querySelector('thead tr').childNodes,
-                arr = e.target.closest('tr').childNodes;
+              let month = 0,
+                day = (86400 * parseInt(e.target.innerHTML)),
+                theadTable = e.target.closest('table').querySelector('thead tr').childNodes,
+                arr = e.target.closest('tr').childNodes,
+                tableAll = Array.from(e.target.closest('#calendar').querySelectorAll('table'));
+                
+              if(setDay.day === false && !Array.from(e.target.classList).includes('numbeWeek')) {
+                tableAll.map((elem, key) => {
+                  if( e.target.closest('table') == elem ) {
+                    month += ( 2592000 * key )
+                  }
+                });
+                
+                timestampHelper.innerHTML = `<h4>timestamp</h4><p>${month+day}</p>`
+                timestampHelper.style.display = 'flex'
+                timestampHelper.style.left = e.pageX+20+'px'
+                timestampHelper.style.top = e.pageY+'px'
+                
+                setDay.day = true
+                setDay.value = day
+              }
               
-              arr.forEach((it, k)=>{
+              arr.forEach((it, k) => {
                 if(it==e.target && (it.classList.contains('weekend') || it.classList.length===0)){
-                  e.target.setAttribute('style', 'background: #fafad2; font-size: 15px; padding: 0; font-weight: bold;')
+                  e.target.setAttribute('style', 'background: #fafad2; font-size: 15px; padding: 0; font-weight: bold; cursor: pointer;')
                   it.closest('tr').childNodes[0].setAttribute('style', 'background: #fafad2;')
                   theadTable[k].setAttribute('style', 'background: #fafad2; font-size: 14px;')
                 }
               })
-              
             }),
             item.addEventListener('mouseleave', e => {
+              if(setDay.day) {
+                document.querySelector('.timestamp-helper').removeAttribute('style')
+                setDay.day = false
+                setDay.value = 0
+              }
               e.target.removeAttribute('style')
               e.target.closest('table').querySelectorAll('tbody tr').forEach(item => item.querySelector('td').removeAttribute('style'))
               e.target.closest('table').querySelector('thead tr').childNodes.forEach(item => item.removeAttribute('style'))
@@ -302,7 +341,7 @@
                 tbody = document.createElement('tbody');
                 
                 thead.innerHTML = headerCalendar.map((i,k) => (k===0?`<th class="titleTable">${i}</th>`:`<th>${i}</th>`)).join('')
-                caption.innerHTML = `${key+1} ${headerMonth[key]}`
+                caption.innerHTML = headerMonth[key]
                 table.append(caption)
                 table.setAttribute('class', 'table')
                 table.setAttribute('border', '1')
@@ -311,19 +350,34 @@
                 table.setAttribute('frame', 'void')
               return {table, thead, tbody}
             };
-          let numberShowMount = parseInt(number), lastWeek = 0, weekAll=0;
+          
+          let numberShowMount = parseInt(number), lastWeek = 0, weekAll=0, table;
           conteiner.innerHTML = ''
           for (let key = 0; key < numberShowMount; key++) {
-            if(parseInt(key % 12) == 0 && key > 0) conteiner.append(document.createElement('hr'))            
+            if(key % 12 == 0){
+              table = document.createElement('div');
+              table.setAttribute('class', 'calendar-year');
+
+              const p = document.createElement('p'),
+                hr = document.createElement('hr'),
+                year = `${(key / 12) +1}`.padStart(4, 0);
+
+              p.setAttribute('class', 'year');
+              p.innerHTML = `${hr.outerHTML} <strong>${year} г.</strong> ${hr.outerHTML}`
+              table.append(p);
+              conteiner.append(table);
+            }
+
             let te = createTable(parseInt(key % 12)),tr = '',week = 0,day=1,appleDay = true;
             
             te.tbody.innerHTML = [...Array(37).keys()].slice(1, 37).map(i => {
-              let startTr = (week==0?'<tr>':'')
+              let startTr = (week==0?'<tr>':'');
               week +=1;
               let endTr = (week==7?(week=0,'</tr>'):'');
+              
               if(startTr !== '' && day !== ''){
-                weekAll+=1
-                if(weekAll === 63) weekAll=1
+                weekAll+=1;
+                if(weekAll > 51) weekAll = 1;
               }
 
               if(lastWeek > 0 && i < 30 && day !== ''){
@@ -331,41 +385,43 @@
                 tr =  `${startTr}${(week==1?'<td class="numbeWeek">'+weekAll+'</td>':'')}<td style="visibility: hidden;"></td>${endTr}`;
               } else if(appleDay && day !== '') {
                 tr = `${startTr}${(week==1?'<td class="numbeWeek">'+weekAll+'</td>':'')}<td ${(week>5 || week<1?'class="weekend"':'')}>${day}</td>${endTr}`;
-                (day<30 ? (day += 1) : (day = '',appleDay = false, lastWeek = week));
+                (day<=29 ? (day +=1) : (day='' ,weekAll-=1,appleDay=false, lastWeek=week));
+                if(key % 12 == 0 && day < 3 && weekAll> 48) weekAll = 0;
               } else {
                 tr =  ``;
               }
+
               return tr;
-            }).join('')
-            te.table.append(te.thead, te.tbody)
-            conteiner.append(te.table)
-            setLineShow()
+            }).join('');
+
+            te.table.append(te.thead, te.tbody);
+            table.append(te.table);
+            conteiner.append(table);
+            setLineShow();
           }    
         };
       
       document.addEventListener("DOMContentLoaded", function(event) {
-
-        let timer = setTimeout( function tick(){
+        let timer = setTimeout( function tick(){// Test normal time
           document.querySelector('#baseTime').innerHTML = new Date().toLocaleString()
-          timer = setTimeout(tick, 1000);
+          timer = setTimeout(tick, 950);
         }, 950)
         
-
-        document.querySelector('#month').value = controll.month/2592000 || 1;
+        document.querySelector('#month').value = controll.month/2592000 || 0;
         document.querySelector('#day').value = controll.day/86400 || 0;
         document.querySelector('#hour').value = controll.hour/3600 || 0;
         document.querySelector('#minute').value = controll.minute/60 || 0;
-        document.querySelector('#timestamp').value = (controll.month+controll.day+controll.hour+controll.minute) || 0
-        addTable(document.querySelector('#month').value)   
+        document.querySelector('#timestamp').value = controll.seconds || 0;
         
-        document.querySelectorAll('.direction').forEach(item => item.addEventListener('click', e=>{
+        addTable(document.querySelector('#month').value)
+
+        document.querySelectorAll('.direction').forEach(item => item.addEventListener('click', e => {
           if( e.target.dataset.direction === 'prev' ){
             setReverseTime(true)
           } else {
             setReverseTime(false)
           }
         }))
-        
         document.querySelector('#formTask').addEventListener('submit', function(e) {
           e.preventDefault();
           
@@ -414,26 +470,26 @@
         document.querySelectorAll('.speed').forEach(item =>item.addEventListener("click", e => speedTime( parseInt(e.target.dataset.speed) )));
         document.querySelector('#minute').addEventListener("input", function(e) {
           controll.minute = (60 * parseInt(e.target.value))
-          let timestamp = controll.minute+controll.hour+controll.day+controll.month
-          document.querySelector('#timestamp').value = timestamp
+          controll.seconds = controll.minute+controll.hour+controll.day+controll.month
+          document.querySelector('#timestamp').value = controll.seconds
           localStorage.setItem('controllTime', JSON.stringify(controll));
         });
         document.querySelector('#hour').addEventListener("input", function(e) {
           controll.hour = (3600 * parseInt(e.target.value))
-          let timestamp = controll.minute+controll.hour+controll.day+controll.month
-          document.querySelector('#timestamp').value = timestamp
+          controll.seconds = controll.minute+controll.hour+controll.day+controll.month
+          document.querySelector('#timestamp').value = controll.seconds
           localStorage.setItem('controllTime', JSON.stringify(controll));
         });
         document.querySelector('#day').addEventListener("input", function(e) {
           controll.day = (86400 * parseInt(e.target.value))
-          let timestamp = controll.minute+controll.hour+controll.day+controll.month
-          document.querySelector('#timestamp').value = timestamp
+          controll.seconds = controll.minute+controll.hour+controll.day+controll.month
+          document.querySelector('#timestamp').value = controll.seconds
           localStorage.setItem('controllTime', JSON.stringify(controll));
         });
         document.querySelector('#month').addEventListener("input", function(e) {
           controll.month = (2592000 * parseInt(e.target.value))
-          let timestamp = controll.minute+controll.hour+controll.day+controll.month
-          document.querySelector('#timestamp').value = timestamp
+          controll.seconds = controll.minute+controll.hour+controll.day+controll.month
+          document.querySelector('#timestamp').value = controll.seconds
 
           addTable(e.target.value)
           localStorage.setItem('controllTime', JSON.stringify(controll));          
